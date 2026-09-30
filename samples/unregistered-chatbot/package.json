@@ -1,0 +1,11 @@
+{
+  "name": "unregistered-chatbot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "app.js",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "express": "^4.21.0"
+  }
+}
