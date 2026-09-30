@@ -34,8 +34,8 @@ is not enough on its own – the agent should confirm by reading the surrounding
 ## Searching remotely (no clone)
 
 When scanning repositories you have not checked out, use GitHub code search rather than
-downloading the tree. Four constraints of those APIs change how the signals above must
-be queried:
+downloading the tree. Several constraints of those APIs change how the signals above
+must be queried:
 
 - Scope repository search with `owner:<owner>` – it matches both user and organisation
   accounts, while `org:<owner>` returns **zero** results for a user account and
