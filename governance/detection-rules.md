@@ -42,9 +42,11 @@ queried:
 - Scope *code* search with `repo:<owner>/<name>`, one repository at a time. Code search
   does **not** support the `owner:` qualifier (it returns zero results); `user:`/`org:`
   work but only for the matching account type.
-- Issue **one quoted signal per query**. `OR` between signals and dotted package names
-  such as `Azure.AI.OpenAI` match poorly because code search tokenises on `.`; prefer a
-  distinctive single token (`"SemanticKernel"`, `"openai"`, `"@anthropic-ai/sdk"`).
+- **Quote every signal.** A quoted phrase matches even when it contains dots or spaces
+  (`"openai.azure.com"`, `"Microsoft.Agents.AI"`, `"from openai import"`); unquoted
+  dotted names do not, because code search tokenises on `.`.
+- **Never join signals with `OR`** – `Azure.AI.OpenAI OR Microsoft.SemanticKernel`
+  returns nothing. Issue one query per signal.
 
 Use the `text_matches` snippets returned by the search to triage, and fetch file
 contents only for the candidates the snippet cannot settle.

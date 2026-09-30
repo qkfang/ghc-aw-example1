@@ -86,21 +86,25 @@ if it is empty, not a whole number, or not greater than zero.
      account or an organisation, and `owner:` matches both in *repository* search,
      whereas `org:` silently returns **zero** results for a user account and `user:`
      returns zero for an organisation.
-  2. Drop archived and fork repositories, then keep only the **first N** results,
-     where N is the repository budget above (default `5`). State in the report which
-     repositories were scanned and how many were skipped because of the budget.
+  2. Ignore archived repositories and forks. Page through the results until you have
+     **N eligible** repositories, where N is the repository budget above (default `5`),
+     or until the results are exhausted – the first page may be mostly archived repos
+     or forks, so do not assume one page is enough. In the report, list the
+     repositories you scanned in order and state how many eligible repositories were
+     left unscanned because of the budget (use `total_count` and the pages you read to
+     give that number, or say "unknown" if you could not determine it).
   3. For each kept repository, run `search_code` scoped with
      `repo:${{ github.repository_owner }}/<name>`, **one strong signal per query**.
      Always scope code search by `repo:` — *code* search does not support the `owner:`
      qualifier (it returns zero results), and scoping per repository is what keeps the
      run inside the repository budget:
-     - Do **not** combine signals with `OR` and do not rely on dotted package names
-       matching as a whole – GitHub code search tokenises on `.`, so
-       `Azure.AI.OpenAI OR Microsoft.SemanticKernel` returns nothing while a single
-       quoted term such as `"openai"` or `"SemanticKernel"` works.
-     - Quote each signal, e.g. `repo:owner/name "from openai import"`,
-       `repo:owner/name "@anthropic-ai/sdk"`, `repo:owner/name "SemanticKernel"`,
-       `repo:owner/name "openai.azure.com"`.
+     - **Always quote the signal.** A quoted phrase matches even when it contains dots
+       or spaces (`"openai.azure.com"`, `"Microsoft.Agents.AI"`, `"from openai import"`
+       all work). Unquoted dotted names do not match reliably, because code search
+       tokenises on `.`.
+     - **Never combine signals with `OR`.** `Azure.AI.OpenAI OR Microsoft.SemanticKernel`
+       returns nothing, while the same signals issued as separate quoted queries return
+       hits. Issue one query per signal even though that costs more calls.
      - Request the `text_matches` field and use the returned snippet to triage; only
        call `get_file_contents` on a file when the snippet is not conclusive.
   4. Confirm the remaining candidates by reading just the relevant dependency
