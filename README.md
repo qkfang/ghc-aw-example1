@@ -25,7 +25,8 @@ schedule (weekly) / manual dispatch / push to governance or samples
 Copilot agent in GitHub Actions (read-only token, sandboxed network)
   1. reads governance/ai-register.yml + detection-rules.md
   2. finds AI usage  – scope=repo: grep the checkout
-                     – scope=org : GitHub code search across org:<owner>
+                     – scope=org : GitHub code search across user:<owner>,
+                                   first `max_repos` (default 5) repos, remote only
   3. matches each finding to register entries (repository + path prefix)
         │
         ▼
@@ -53,11 +54,21 @@ The agent never gets write access: it only proposes an issue, which gh-aw's
 The default `GITHUB_TOKEN` can only read this repository. For `scope = org`:
 
 1. Create a fine-grained PAT (or GitHub App) with read access to **Contents** and
-   **Metadata** on all repositories in the organisation.
+   **Metadata** on all repositories you want scanned.
 2. Save it as the `GH_AW_GITHUB_MCP_SERVER_TOKEN` secret – gh-aw uses it automatically
    for the GitHub MCP tools.
 3. Run the workflow with `scope = org`. The schedule can also be switched to org scope
    by changing the default input.
+
+The org scan is **remote only** – it never clones the other repositories. It lists the
+owner's repositories via code search, keeps the most recently updated `max_repos`
+(default **5**, adjustable per run), and probes each one with `search_code` before
+fetching only the manifests that matched. Two quirks are baked into the instructions:
+
+- Use `user:<owner>`, not `org:<owner>` – the `org:` qualifier returns zero results when
+  the owner is a personal account.
+- One quoted signal per query; `OR` and dotted names like `Azure.AI.OpenAI` do not match
+  reliably because code search tokenises on `.`.
 
 Tip: host this in a central "governance" repository so the register and the monitor
 live together, and use `safe-outputs.create-issue.target-repo` if you want issues filed
