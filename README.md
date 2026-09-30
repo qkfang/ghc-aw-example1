@@ -63,9 +63,9 @@ The default `GITHUB_TOKEN` can only read this repository. For `scope = org`:
 
 The org scan is **remote only** – it never clones the other repositories. It lists the
 owner's repositories via repository search, skips archived repositories and forks, keeps
-the most recently updated `max_repos` (default **5**, adjustable per run), and probes
-each one with `search_code` before fetching only the manifests that matched. Three
-quirks are baked into the instructions:
+the most recently updated `max_repos` (default **5**, selectable per run: 3 / 5 / 10 / 20),
+and probes each one with `search_code` before fetching only the manifests that matched.
+Three quirks are baked into the instructions:
 
 - List repositories with `owner:<owner>` – it matches both user and organisation
   accounts, while `org:<owner>` returns zero results for a personal account (and

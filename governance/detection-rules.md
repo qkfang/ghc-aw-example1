@@ -41,7 +41,10 @@ queried:
   `user:<owner>` returns zero for an organisation.
 - Scope *code* search with `repo:<owner>/<name>`, one repository at a time. Code search
   does **not** support the `owner:` qualifier (it returns zero results); `user:`/`org:`
-  work but only for the matching account type.
+  work but only for the matching account type. Scoping per repository is also what keeps
+  a scan inside the caller's repository budget – list repositories first, bound the list
+  to that budget (default **5** when the caller does not set one), and only then search
+  the kept repositories.
 - **Quote every signal.** A quoted phrase matches even when it contains dots or spaces
   (`"openai.azure.com"`, `"Microsoft.Agents.AI"`, `"from openai import"`); unquoted
   dotted names do not, because code search tokenises on `.`.
