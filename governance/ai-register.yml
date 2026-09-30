@@ -1,0 +1,32 @@
+# AI Governance Register
+# ----------------------
+# Every AI solution (anything that calls an LLM / ML model or AI service) built in
+# the organisation must have an entry here BEFORE it goes to production.
+#
+# The "AI Governance Scan" agentic workflow (.github/workflows/ai-governance-scan.md)
+# compares what it finds in code against this file and raises an issue for any
+# AI usage that is not registered.
+#
+# Matching rules used by the scanner:
+#   - `repository` must match "owner/name" (case-insensitive)
+#   - `paths` are path prefixes inside that repository covered by the entry
+#     (use "/" to cover the whole repository)
+
+solutions:
+  - id: AI-0001
+    name: Document Summarizer
+    repository: qkfang/ghc-aw-example1
+    paths:
+      - samples/registered-summarizer/
+    owner: "@qkfang"
+    business_unit: Operations
+    purpose: Summarise internal policy documents for staff
+    providers:
+      - Azure OpenAI
+    models:
+      - gpt-4o-mini
+    data_classification: Internal
+    risk_rating: Low
+    status: Approved
+    approved_on: 2026-09-01
+    review_due: 2027-03-01
