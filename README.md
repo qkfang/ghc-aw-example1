@@ -25,8 +25,9 @@ schedule (weekly) / manual dispatch / push to governance or samples
 Copilot agent in GitHub Actions (read-only token, sandboxed network)
   1. reads governance/ai-register.yml + detection-rules.md
   2. finds AI usage  – scope=repo: grep the checkout
-                     – scope=org : GitHub code search across user:<owner>,
-                                   first `max_repos` (default 5) repos, remote only
+                     – scope=org : repo search owner:<owner>, then code search
+                                   repo:<owner>/<name> – first `max_repos` (default 5),
+                                   remote only, never cloned
   3. matches each finding to register entries (repository + path prefix)
         │
         ▼
@@ -61,12 +62,15 @@ The default `GITHUB_TOKEN` can only read this repository. For `scope = org`:
    by changing the default input.
 
 The org scan is **remote only** – it never clones the other repositories. It lists the
-owner's repositories via code search, keeps the most recently updated `max_repos`
+owner's repositories via repository search, keeps the most recently updated `max_repos`
 (default **5**, adjustable per run), and probes each one with `search_code` before
-fetching only the manifests that matched. Two quirks are baked into the instructions:
+fetching only the manifests that matched. Three quirks are baked into the instructions:
 
-- Use `user:<owner>`, not `org:<owner>` – the `org:` qualifier returns zero results when
-  the owner is a personal account.
+- List repositories with `owner:<owner>` – it matches both user and organisation
+  accounts, while `org:<owner>` returns zero results for a personal account (and
+  `user:` for an org).
+- Scope each code search with `repo:<owner>/<name>` – code search does not support the
+  `owner:` qualifier.
 - One quoted signal per query; `OR` and dotted names like `Azure.AI.OpenAI` do not match
   reliably because code search tokenises on `.`.
 

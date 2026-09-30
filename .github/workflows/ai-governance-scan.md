@@ -15,7 +15,7 @@ on:
           - repo
           - org
       max_repos:
-        description: "For scope 'org': how many of the most recently updated repositories to scan"
+        description: "For scope 'org': how many of the most recently updated repositories to scan (positive integer)"
         required: false
         default: "5"
         type: string
@@ -57,12 +57,14 @@ timeout-minutes: 20
 
 # AI Governance Register Compliance Scan
 
-You are an AI governance auditor for the **${{ github.repository_owner }}** account.
-Your job is to find AI solutions (code that calls an LLM, generative AI service, or ML
-model) that have **not** been logged in the AI Governance Register.
+You are an AI governance auditor for the **${{ github.repository_owner }}** user or
+organisation account. Your job is to find AI solutions (code that calls an LLM,
+generative AI service, or ML model) that have **not** been logged in the AI
+Governance Register.
 
 Scan scope for this run: `${{ github.event.inputs.scope }}` (if empty, treat it as `repo`).
-Repository budget for `org` scans: `${{ github.event.inputs.max_repos }}` (if empty, use `5`).
+Repository budget for `org` scans: `${{ github.event.inputs.max_repos }}`. Treat it as `5`
+if it is empty, not a whole number, or not greater than zero.
 
 ## Inputs
 
@@ -79,16 +81,19 @@ Repository budget for `org` scans: `${{ github.event.inputs.max_repos }}` (if em
 
 - **scope = `org`**: do a **remote** scan – never clone or download whole repositories.
 
-  1. Call `search_repositories` with `user:${{ github.repository_owner }}`,
+  1. Call `search_repositories` with `owner:${{ github.repository_owner }}`,
      `sort: updated`, `order: desc`. `${{ github.repository_owner }}` may be a user
-     account rather than an organisation, and the `org:` qualifier silently returns
-     **zero** results for user accounts – always use `user:` (or `owner:`) here and in
-     every code-search query below.
+     account or an organisation, and `owner:` matches both in *repository* search,
+     whereas `org:` silently returns **zero** results for a user account and `user:`
+     returns zero for an organisation.
   2. Drop archived and fork repositories, then keep only the **first N** results,
      where N is the repository budget above (default `5`). State in the report which
      repositories were scanned and how many were skipped because of the budget.
   3. For each kept repository, run `search_code` scoped with
-     `repo:${{ github.repository_owner }}/<name>`, **one strong signal per query**:
+     `repo:${{ github.repository_owner }}/<name>`, **one strong signal per query**.
+     Always scope code search by `repo:` — *code* search does not support the `owner:`
+     qualifier (it returns zero results), and scoping per repository is what keeps the
+     run inside the repository budget:
      - Do **not** combine signals with `OR` and do not rely on dotted package names
        matching as a whole – GitHub code search tokenises on `.`, so
        `Azure.AI.OpenAI OR Microsoft.SemanticKernel` returns nothing while a single

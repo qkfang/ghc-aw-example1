@@ -36,8 +36,12 @@ When scanning repositories you have not checked out, use GitHub code search rath
 downloading the tree. Two constraints of that API change how the signals above must be
 queried:
 
-- Scope with `user:<owner>` (or `owner:`/`repo:`). `org:<owner>` returns **zero**
-  results when the owner is a user account rather than an organisation.
+- Scope repository search with `owner:<owner>` – it matches both user and organisation
+  accounts, while `org:<owner>` returns **zero** results for a user account and
+  `user:<owner>` returns zero for an organisation.
+- Scope *code* search with `repo:<owner>/<name>`, one repository at a time. Code search
+  does **not** support the `owner:` qualifier (it returns zero results); `user:`/`org:`
+  work but only for the matching account type.
 - Issue **one quoted signal per query**. `OR` between signals and dotted package names
   such as `Azure.AI.OpenAI` match poorly because code search tokenises on `.`; prefer a
   distinctive single token (`"SemanticKernel"`, `"openai"`, `"@anthropic-ai/sdk"`).
