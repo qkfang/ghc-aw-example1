@@ -65,7 +65,7 @@ The org scan is **remote only** – it never clones the other repositories. It l
 owner's repositories via repository search, skips archived repositories and forks, keeps
 the most recently updated `max_repos` (default **5**, selectable per run: 3 / 5 / 10 / 20),
 and probes each one with `search_code` before fetching only the manifests that matched.
-Three quirks are baked into the instructions:
+Four constraints of the search APIs are baked into the instructions:
 
 - List repositories with `owner:<owner>` – it matches both user and organisation
   accounts, while `org:<owner>` returns zero results for a personal account (and
@@ -74,6 +74,9 @@ Three quirks are baked into the instructions:
   `owner:` qualifier.
 - Quote every signal (a quoted phrase matches dots and spaces fine) and never join
   signals with `OR` – `Azure.AI.OpenAI OR Microsoft.SemanticKernel` returns nothing.
+- Code search allows ~10 requests/minute, so each repository is probed with a handful of
+  broad signals rather than the full detection table, and the issue reports reduced
+  coverage if rate limiting cuts a run short.
 
 Tip: host this in a central "governance" repository so the register and the monitor
 live together, and use `safe-outputs.create-issue.target-repo` if you want issues filed

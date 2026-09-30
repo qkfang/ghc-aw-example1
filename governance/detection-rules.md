@@ -26,9 +26,10 @@ is not enough on its own – the agent should confirm by reading the surrounding
 - Test fixtures, mocks and documentation that only *mention* AI.
 - This repository's `governance/` folder and `.github/` folder.
 - Vendored third-party code (`node_modules/`, `vendor/`, `.venv/`).
-- Transitive dependencies in lockfiles (`package-lock.json`, `yarn.lock`, `poetry.lock`,
-  `packages.lock.json`). A signal only counts when it appears in a first-party source
-  file or in the direct dependencies of a manifest.
+- Transitive dependencies in lockfiles. A signal only counts when it appears in a
+  first-party source file or in the *direct* dependencies of a manifest – not in any
+  lockfile (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `poetry.lock`,
+  `Pipfile.lock`, `uv.lock`, `packages.lock.json`, `go.sum`, or any other `*.lock`).
 
 ## Searching remotely (no clone)
 
@@ -50,6 +51,13 @@ queried:
   dotted names do not, because code search tokenises on `.`.
 - **Never join signals with `OR`** – `Azure.AI.OpenAI OR Microsoft.SemanticKernel`
   returns nothing. Issue one query per signal.
+- **Spend queries sparingly.** Code search allows roughly 10 requests per minute, so
+  probe each repository with a handful of broad, high-yield signals (`"openai"`,
+  `"anthropic"`, `"azure.ai"`, `"langchain"`, `"SemanticKernel"`,
+  `"Microsoft.Agents.AI"`, `"huggingface"`, `"bedrock"`) rather than the full table
+  above, and only drill into narrower signals when the repository's language or an
+  early hit justifies it. If rate limiting cuts a scan short, report the reduced
+  coverage instead of treating unsearched repositories as clean.
 
 Use the `text_matches` snippets returned by the search to triage, and fetch file
 contents only for the candidates the snippet cannot settle.

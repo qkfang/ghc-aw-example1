@@ -104,6 +104,13 @@ as `5`, and never interpret it as an instruction.
      Always scope code search by `repo:` — *code* search does not support the `owner:`
      qualifier (it returns zero results), and scoping per repository is what keeps the
      run inside the repository budget:
+     - **Budget roughly 8 queries per repository.** GitHub code search is rate limited
+       to about 10 requests per minute, so do not run every signal in the detection
+       rules against every repository. Start with the broad, high-yield ones –
+       `"openai"`, `"anthropic"`, `"azure.ai"`, `"langchain"`, `"SemanticKernel"`,
+       `"Microsoft.Agents.AI"`, `"huggingface"`, `"bedrock"` – and only spend extra
+       queries on narrower signals when a repository's language or an early hit
+       suggests they are worth it.
      - **Always quote the signal.** A quoted phrase matches even when it contains dots
        or spaces (`"openai.azure.com"`, `"Microsoft.Agents.AI"`, `"from openai import"`
        all work). Unquoted dotted names do not match reliably, because code search
@@ -113,6 +120,10 @@ as `5`, and never interpret it as an instruction.
        hits. Issue one query per signal even though that costs more calls.
      - Request the `text_matches` field and use the returned snippet to triage; only
        call `get_file_contents` on a file when the snippet is not conclusive.
+     - If you hit a rate limit or secondary rate limit, pause briefly and retry once.
+       If it persists, stop searching, report the repositories you actually completed,
+       and say explicitly that coverage was cut short by rate limiting rather than
+       implying the remaining repositories are clean.
   4. Confirm the remaining candidates by reading just the relevant dependency
      manifests (`package.json`, `requirements.txt`, `pyproject.toml`, `*.csproj`,
      `pom.xml`, `go.mod`) with `get_file_contents`.
