@@ -51,36 +51,36 @@ must be queried:
   dotted names do not, because code search tokenises on `.`.
 - **Never join signals with `OR`** – `Azure.AI.OpenAI OR Microsoft.SemanticKernel`
   returns nothing. Issue one query per signal.
-- **Spend queries sparingly and pace them.** Code search allows roughly 10 requests per
-  minute. Probe each repository with the first-pass signals below rather than the full
-  table above, work through one repository at a time, and pause between batches so the
-  run stays under that limit; only drill into narrower signals when the repository's
-  language or an early hit justifies it. If rate limiting still cuts a scan short,
-  report the reduced coverage instead of treating unsearched repositories as clean.
+- **Spend queries sparingly and pace them** – see "First-pass probe signals" below for
+  the list to use and the pacing budget.
 
 ### First-pass probe signals
 
 This is the canonical short list every remote scan starts with. Keep it here only; the
 workflow and the custom agent refer to this section rather than repeating it. Each token
-is chosen to cover a whole provider family across languages – e.g. `"openai"` catches
-`import openai`, `from "openai"`, `Azure.AI.OpenAI`, `openai.azure.com` and
-`agent-framework-openai`.
+covers a provider family across languages – e.g. `"openai"` catches `import openai`,
+`from "openai"`, `Azure.AI.OpenAI`, `openai.azure.com` and `agent-framework-openai`.
+Note that code search tokenises on `.` **and** `_`, so casing variants of the same
+product need separate probes: `"SemanticKernel"` does *not* match Python's
+`semantic_kernel`, which is why both appear below.
 
 ```
-"openai"       "anthropic"     "azure.ai"      "langchain"
-"generative-ai" "generativeai" "huggingface"   "transformers"
-"bedrock"      "sagemaker"     "SemanticKernel" "Microsoft.Agents.AI"
-"Microsoft.Extensions.AI"      "mistralai"     "cohere"        "ollama"
+"openai"        "anthropic"      "azure.ai"        "langchain"
+"generative-ai" "generativeai"   "huggingface"     "transformers"
+"bedrock"       "sagemaker"      "llama_index"     "llamaindex"
+"SemanticKernel" "semantic_kernel" "Microsoft.Agents.AI" "Microsoft.Extensions.AI"
+"mistralai"     "cohere"         "ollama"
 ```
 
-That is roughly 16 queries per repository. Because code search allows only about 10
-requests per minute, pace the queries – work through one repository at a time and pause
-between batches rather than firing them all at once. Budget about 1.5–2 minutes per
-repository when deciding how many repositories a run can cover.
+That is roughly 19 queries per repository. Because code search allows only about 10
+requests per minute, work through one repository at a time and pause between batches
+rather than firing the queries all at once; only drill into narrower signals from the
+table above when a repository's language or an early hit justifies it. Budget about two
+minutes per repository when deciding how many repositories a run can cover.
 
-If you drop any of these probes to save time, say so explicitly in the report (for
-example "first pass did not probe for Cohere/Ollama") so nobody reads a clean result as
-proof that those providers are absent.
+If rate limiting cuts a scan short, or you drop any of these probes to save time, say so
+explicitly in the report (for example "first pass did not probe for Cohere/Ollama") so
+nobody reads a clean result as proof that those providers are absent.
 
 Use the `text_matches` snippets returned by the search to triage, and fetch file
 contents only for the candidates the snippet cannot settle.
