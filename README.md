@@ -77,8 +77,8 @@ Several constraints of the search APIs are baked into the instructions:
 - Code search allows ~10 requests/minute, so each repository is probed with the
   "First-pass probe signals" short list in `detection-rules.md` rather than the full
   detection table, and the queries are paced to stay under the limit – budget roughly
-  1.5–2 minutes per repository. The issue reports reduced coverage if rate limiting or
-  the 30-minute timeout cuts a run short.
+  about 2 minutes per repository. The issue reports reduced coverage if rate limiting or
+  the 40-minute timeout cuts a run short.
 
 Tip: host this in a central "governance" repository so the register and the monitor
 live together, and use `safe-outputs.create-issue.target-repo` if you want issues filed

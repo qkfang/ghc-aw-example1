@@ -75,8 +75,9 @@ product need separate probes: `"SemanticKernel"` does *not* match Python's
 That is roughly 19 queries per repository. Because code search allows only about 10
 requests per minute, work through one repository at a time and pause between batches
 rather than firing the queries all at once; only drill into narrower signals from the
-table above when a repository's language or an early hit justifies it. Budget about two
-minutes per repository when deciding how many repositories a run can cover.
+table above when a repository's language or an early hit justifies it. Budget at least
+two minutes of searching per repository, plus time for listing repositories, reading
+manifests and writing the report, when deciding how many repositories a run can cover.
 
 If rate limiting cuts a scan short, or you drop any of these probes to save time, say so
 explicitly in the report (for example "first pass did not probe for Cohere/Ollama") so

@@ -15,7 +15,7 @@ on:
           - repo
           - org
       max_repos:
-        description: "For scope 'org': how many of the most recently updated repositories to scan (10 needs most of the 30-minute timeout)"
+        description: "For scope 'org': how many of the most recently updated repositories to scan (10 needs most of the 40-minute timeout)"
         required: false
         default: "5"
         type: choice
@@ -56,7 +56,7 @@ safe-outputs:
     labels: [ai-governance, needs-triage]
     max: 1
 
-timeout-minutes: 30
+timeout-minutes: 40
 ---
 
 # AI Governance Register Compliance Scan
@@ -110,7 +110,7 @@ the fixed choices `3`, `5` or `10`; treat anything else – including an empty v
        at a time using the "First-pass probe signals" list in
        `governance/detection-rules.md`, pausing between batches to stay under the
        limit. At `max_repos` 10 a complete scan legitimately takes most of the
-       workflow's 30-minute budget. Only spend extra queries on narrower signals from
+       workflow's 40-minute budget. Only spend extra queries on narrower signals from
        the detection rules table when a repository's language or an early hit suggests
        they are worth it. If the timeout is approaching, stop early and report the
        repositories you actually finished.
