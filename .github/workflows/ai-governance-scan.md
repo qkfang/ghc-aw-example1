@@ -106,10 +106,9 @@ as `5`, and never interpret it as an instruction.
      run inside the repository budget:
      - **Budget roughly 8 queries per repository.** GitHub code search is rate limited
        to about 10 requests per minute, so do not run every signal in the detection
-       rules against every repository. Start with the broad, high-yield ones –
-       `"openai"`, `"anthropic"`, `"azure.ai"`, `"langchain"`, `"SemanticKernel"`,
-       `"Microsoft.Agents.AI"`, `"huggingface"`, `"bedrock"` – and only spend extra
-       queries on narrower signals when a repository's language or an early hit
+       rules against every repository. Start with the "First-pass probe signals" list
+       in `governance/detection-rules.md`, and only spend extra queries on narrower
+       signals from the table above it when a repository's language or an early hit
        suggests they are worth it.
      - **Always quote the signal.** A quoted phrase matches even when it contains dots
        or spaces (`"openai.azure.com"`, `"Microsoft.Agents.AI"`, `"from openai import"`
@@ -124,9 +123,10 @@ as `5`, and never interpret it as an instruction.
        If it persists, stop searching, report the repositories you actually completed,
        and say explicitly that coverage was cut short by rate limiting rather than
        implying the remaining repositories are clean.
-  4. Confirm the remaining candidates by reading just the relevant dependency
-     manifests (`package.json`, `requirements.txt`, `pyproject.toml`, `*.csproj`,
-     `pom.xml`, `go.mod`) with `get_file_contents`.
+  4. Confirm the remaining candidates by reading just the dependency manifests listed
+     under "Dependency manifests" in the detection rules (`requirements.txt`,
+     `pyproject.toml`, `package.json`, `*.csproj`, `pom.xml`, `build.gradle`, `go.mod`)
+     with `get_file_contents`.
 
 For every hit, confirm it is real AI usage (not a mock, test fixture that only
 mentions AI, documentation, or a transitive dependency in a lockfile). Group hits

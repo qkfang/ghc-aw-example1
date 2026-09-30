@@ -34,8 +34,8 @@ is not enough on its own – the agent should confirm by reading the surrounding
 ## Searching remotely (no clone)
 
 When scanning repositories you have not checked out, use GitHub code search rather than
-downloading the tree. Two constraints of that API change how the signals above must be
-queried:
+downloading the tree. Four constraints of those APIs change how the signals above must
+be queried:
 
 - Scope repository search with `owner:<owner>` – it matches both user and organisation
   accounts, while `org:<owner>` returns **zero** results for a user account and
@@ -52,12 +52,21 @@ queried:
 - **Never join signals with `OR`** – `Azure.AI.OpenAI OR Microsoft.SemanticKernel`
   returns nothing. Issue one query per signal.
 - **Spend queries sparingly.** Code search allows roughly 10 requests per minute, so
-  probe each repository with a handful of broad, high-yield signals (`"openai"`,
-  `"anthropic"`, `"azure.ai"`, `"langchain"`, `"SemanticKernel"`,
-  `"Microsoft.Agents.AI"`, `"huggingface"`, `"bedrock"`) rather than the full table
+  probe each repository with the first-pass signals below rather than the full table
   above, and only drill into narrower signals when the repository's language or an
   early hit justifies it. If rate limiting cuts a scan short, report the reduced
   coverage instead of treating unsearched repositories as clean.
+
+### First-pass probe signals
+
+This is the canonical short list every remote scan starts with – roughly eight queries
+per repository. Keep it here only; the workflow and the custom agent refer to this
+section rather than repeating it.
+
+```
+"openai"  "anthropic"  "azure.ai"  "langchain"
+"SemanticKernel"  "Microsoft.Agents.AI"  "huggingface"  "bedrock"
+```
 
 Use the `text_matches` snippets returned by the search to triage, and fetch file
 contents only for the candidates the snippet cannot settle.

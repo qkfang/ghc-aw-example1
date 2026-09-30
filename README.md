@@ -74,9 +74,10 @@ Four constraints of the search APIs are baked into the instructions:
   `owner:` qualifier.
 - Quote every signal (a quoted phrase matches dots and spaces fine) and never join
   signals with `OR` – `Azure.AI.OpenAI OR Microsoft.SemanticKernel` returns nothing.
-- Code search allows ~10 requests/minute, so each repository is probed with a handful of
-  broad signals rather than the full detection table, and the issue reports reduced
-  coverage if rate limiting cuts a run short.
+- Code search allows ~10 requests/minute, so each repository is probed with the
+  "First-pass probe signals" short list in `detection-rules.md` rather than the full
+  detection table, and the issue reports reduced coverage if rate limiting cuts a run
+  short.
 
 Tip: host this in a central "governance" repository so the register and the monitor
 live together, and use `safe-outputs.create-issue.target-repo` if you want issues filed
