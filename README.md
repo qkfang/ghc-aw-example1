@@ -25,7 +25,9 @@ schedule (weekly) / manual dispatch / push to governance or samples
 Copilot agent in GitHub Actions (read-only token, sandboxed network)
   1. reads governance/ai-register.yml + detection-rules.md
   2. finds AI usage  – scope=repo: grep the checkout
-                     – scope=org : GitHub code search across org:<owner>
+                     – scope=org : repo search owner:<owner>, then code search
+                                   repo:<owner>/<name> – first `max_repos` (default 5),
+                                   remote only, never cloned
   3. matches each finding to register entries (repository + path prefix)
         │
         ▼
@@ -53,11 +55,30 @@ The agent never gets write access: it only proposes an issue, which gh-aw's
 The default `GITHUB_TOKEN` can only read this repository. For `scope = org`:
 
 1. Create a fine-grained PAT (or GitHub App) with read access to **Contents** and
-   **Metadata** on all repositories in the organisation.
+   **Metadata** on all repositories you want scanned.
 2. Save it as the `GH_AW_GITHUB_MCP_SERVER_TOKEN` secret – gh-aw uses it automatically
    for the GitHub MCP tools.
 3. Run the workflow with `scope = org`. The schedule can also be switched to org scope
    by changing the default input.
+
+The org scan is **remote only** – it never clones the other repositories. It lists the
+owner's repositories via repository search, skips archived repositories and forks, keeps
+the most recently updated `max_repos` (default **5**, selectable per run: 3 / 5 / 10),
+and probes each one with `search_code` before fetching only the manifests that matched.
+Several constraints of the search APIs are baked into the instructions:
+
+- List repositories with `owner:<owner>` – it matches both user and organisation
+  accounts, while `org:<owner>` returns zero results for a personal account (and
+  `user:` for an org).
+- Scope each code search with `repo:<owner>/<name>` – code search does not support the
+  `owner:` qualifier.
+- Quote every signal (a quoted phrase matches dots and spaces fine) and never join
+  signals with `OR` – `Azure.AI.OpenAI OR Microsoft.SemanticKernel` returns nothing.
+- Code search allows ~10 requests/minute, so each repository is probed with the
+  "First-pass probe signals" short list in `detection-rules.md` rather than the full
+  detection table, and the queries are paced to stay under the limit – budget roughly
+  about 2 minutes per repository. The issue reports reduced coverage if rate limiting or
+  the 40-minute timeout cuts a run short.
 
 Tip: host this in a central "governance" repository so the register and the monitor
 live together, and use `safe-outputs.create-issue.target-repo` if you want issues filed
